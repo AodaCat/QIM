@@ -144,6 +144,7 @@ public class ChatActivity extends BaseActivity implements ChatContract.IView, Vi
         if (TextUtils.equals(from,user)){//当前界面user==message发送者
             messages.add(chatMessage);
             mMessageAdapter.notifyItemChanged(messages.size()-1);
+
         }else {
             ToastUtil.showShort(this,"收到新消息...");
         }

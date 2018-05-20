@@ -3,11 +3,16 @@ package cc.adcat.qim.ui.chat;
 import android.content.Context;
 import android.text.TextUtils;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import cc.adcat.qim.App;
+import cc.adcat.qim.bean.ChatBean;
 import cc.adcat.qim.bean.ChatMessage;
+import cc.adcat.qim.bean.sql.gen.ChatBeanDao;
 import cc.adcat.qim.bean.sql.gen.ChatMessageDao;
+import cc.adcat.qim.events.Event;
 import cc.adcat.qim.im.IClient;
 import cc.adcat.qim.im.QIMClient;
 import io.reactivex.Observer;
@@ -18,11 +23,13 @@ public class ChatPresenter implements ChatContract.IPresenter{
     private ChatContract.IView mView;
     private IClient mClient;
     private ChatMessageDao mChatMessageDao;
+    private ChatBeanDao mChatBeanDao;
     public ChatPresenter(Context context, ChatContract.IView view) {
         this.mContext = context;
         this.mView = view;
         mClient = QIMClient.getInstance();
         mChatMessageDao = App.getInstance().getDaoSession().getChatMessageDao();
+        mChatBeanDao = App.getInstance().getDaoSession().getChatBeanDao();
     }
 
     @Override
@@ -67,6 +74,22 @@ public class ChatPresenter implements ChatContract.IPresenter{
                             chatMessage.setTime(System.currentTimeMillis());
                             chatMessage.setBody(msg);
                             mChatMessageDao.insert(chatMessage);
+                            ChatBean chatBean = null;
+                            List<ChatBean> chatBeans = mChatBeanDao.queryBuilder()
+                                    .where(ChatBeanDao.Properties.User.eq(user))
+                                    .build()
+                                    .list();
+                            if (chatBeans.size() == 1){
+                                chatBean = chatBeans.get(0);
+                            }else {
+                                chatBean = new ChatBean();
+                            }
+                            chatBean.setMessage(msg);
+                            chatBean.setUser(user);
+                            chatBean.setTime(System.currentTimeMillis());
+                            chatBean.setUnReadCount(0);
+                            mChatBeanDao.insert(chatBean);
+                            EventBus.getDefault().post(new Event(Event.TYPE_REFRESH_MESSAGE_LIST));
                             callback.onSuccess(chatMessage);
                         }
                     }
@@ -88,5 +111,22 @@ public class ChatPresenter implements ChatContract.IPresenter{
     @Override
     public void restore(ChatMessage message) {
         mChatMessageDao.insert(message);
+        ChatBean chatBean = null;
+        List<ChatBean> chatBeans = mChatBeanDao.queryBuilder()
+                .where(ChatBeanDao.Properties.User.eq(message.getFrom()))
+                .build()
+                .list();
+        if (chatBeans.size() == 1){
+            chatBean = chatBeans.get(0);
+        }else {
+            chatBean = new ChatBean();
+        }
+        chatBean.setMessage(message.getBody());
+        chatBean.setUser(message.getFrom());
+        chatBean.setTime(message.getTime());
+        int unread = chatBean.getUnReadCount();
+        chatBean.setUnReadCount(unread+1);
+        mChatBeanDao.insert(chatBean);
+        EventBus.getDefault().post(new Event(Event.TYPE_REFRESH_MESSAGE_LIST));
     }
 }

@@ -22,6 +22,6 @@ public class AddFriendPresenter implements AddFriendContract.IPresenter{
             mView.toast("用户名不能为空...");
             return;
         }
-        mClient.find(username);
+        mClient.findUser(username);
     }
 }

@@ -19,11 +19,14 @@ import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cc.adcat.qim.App;
 import cc.adcat.qim.R;
+import cc.adcat.qim.bean.ChatBean;
 import cc.adcat.qim.bean.ChatMessage;
+import cc.adcat.qim.bean.sql.gen.ChatBeanDao;
 import cc.adcat.qim.bean.sql.gen.ChatMessageDao;
 import cc.adcat.qim.events.Event;
 import cc.adcat.qim.global.Constant;
@@ -39,6 +42,7 @@ public class QIMService extends Service implements StanzaListener {
     private NotificationManager mNotificationManager;
     private Map<String,Integer> unReadMessages;
     private ChatMessageDao mChatMessageDao;
+    private ChatBeanDao mChatBeanDao;
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -51,6 +55,7 @@ public class QIMService extends Service implements StanzaListener {
         unReadMessages = new HashMap<>();
         mNotificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mChatMessageDao = App.getInstance().getDaoSession().getChatMessageDao();
+        mChatBeanDao = App.getInstance().getDaoSession().getChatBeanDao();
         EventBus.getDefault().register(this);
     }
 
@@ -112,6 +117,23 @@ public class QIMService extends Service implements StanzaListener {
         count++;
         unReadMessages.put(chatMessage.getFrom(),count);
         mChatMessageDao.insert(chatMessage);
+        ChatBean chatBean = null;
+        List<ChatBean> chatBeans = mChatBeanDao.queryBuilder()
+                .where(ChatBeanDao.Properties.User.eq(chatMessage.getFrom()))
+                .build()
+                .list();
+        if (chatBeans.size() == 1){
+            chatBean = chatBeans.get(0);
+        }else {
+            chatBean = new ChatBean();
+        }
+        chatBean.setMessage(chatMessage.getBody());
+        chatBean.setUser(chatMessage.getFrom());
+        chatBean.setTime(chatMessage.getTime());
+        int unread = chatBean.getUnReadCount();
+        chatBean.setUnReadCount(unread+1);
+        mChatBeanDao.insert(chatBean);
+        EventBus.getDefault().post(new Event(Event.TYPE_REFRESH_MESSAGE_LIST));
         int fromCount = unReadMessages.keySet().size();
         String user = "";
         for(String s:unReadMessages.keySet()){

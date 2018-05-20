@@ -39,6 +39,8 @@ import org.jivesoftware.smackx.vcardtemp.provider.VCardProvider;
 import org.jivesoftware.smackx.xdata.Form;
 import org.jivesoftware.smackx.xdata.provider.DataFormProvider;
 import org.jivesoftware.smackx.xhtmlim.provider.XHTMLExtensionProvider;
+import org.jxmpp.jid.impl.JidCreate;
+import org.jxmpp.stringprep.XmppStringprepException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -48,11 +50,9 @@ import java.util.Map;
 import java.util.Set;
 
 import cc.adcat.qim.bean.Contact;
-import cc.adcat.qim.global.Config;
 import cc.adcat.qim.im.xmpp.QIMConnection;
 import cc.adcat.qim.utils.Log;
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -89,100 +89,100 @@ public class QIMClient implements IClient, ConnectionListener, ChatMessageListen
         chats = new HashMap<>();
     }
 
-//    private void configure(ProviderManager pm) {
-//
-////  Private Data Storage
-//        pm.addIQProvider("query", "jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
-//
-////  Time
-//        try {
-//            pm.addIQProvider("query", "jabber:iq:time", Class.forName("org.jivesoftware.smackx.packet.Time"));
-//        } catch (ClassNotFoundException e) {
-//            Log.w("TestClient", "Can't load class for org.jivesoftware.smackx.packet.Time");
-//        }
-//
-////  Roster Exchange
+    private void configure(ProviderManager pm) {
+
+//  Private Data Storage
+        pm.addIQProvider("query", "jabber:iq:private", new PrivateDataManager.PrivateDataIQProvider());
+
+//  Time
+        try {
+            pm.addIQProvider("query", "jabber:iq:time", Class.forName("org.jivesoftware.smackx.packet.Time"));
+        } catch (ClassNotFoundException e) {
+            Log.w("TestClient", "Can't load class for org.jivesoftware.smackx.packet.Time");
+        }
+
+//  Roster Exchange
 //        pm.addExtensionProvider("x", "jabber:x:roster", new RosterExchangeProvider());
-//
-////  Message Events
+
+//  Message Events
 //        pm.addExtensionProvider("x", "jabber:x:event", new MessageEventProvider());
-//
-////  Chat State
-//        pm.addExtensionProvider("active", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-//        pm.addExtensionProvider("composing", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-//        pm.addExtensionProvider("paused", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-//        pm.addExtensionProvider("inactive", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-//        pm.addExtensionProvider("gone", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
-//
-////  XHTML
-//        pm.addExtensionProvider("html", "http://jabber.org/protocol/xhtml-im", new XHTMLExtensionProvider());
-//
-////  Group Chat Invitations
-//        pm.addExtensionProvider("x", "jabber:x:conference", new GroupChatInvitation.Provider());
-//
-////  Service Discovery # Items
-//        pm.addIQProvider("query", "http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
-//
-////  Service Discovery # Info
-//        pm.addIQProvider("query", "http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
-//
-////  Data Forms
-//        pm.addExtensionProvider("x", "jabber:x:data", new DataFormProvider());
-//
-////  MUC User
-//        pm.addExtensionProvider("x", "http://jabber.org/protocol/muc#user", new MUCUserProvider());
-//
-////  MUC Admin
-//        pm.addIQProvider("query", "http://jabber.org/protocol/muc#admin", new MUCAdminProvider());
-//
-////  MUC Owner
-//        pm.addIQProvider("query", "http://jabber.org/protocol/muc#owner", new MUCOwnerProvider());
-//
-////  Delayed Delivery
-//        pm.addExtensionProvider("x", "jabber:x:delay", new DelayInformationProvider());
-//
-////  Version
-//        try {
-//            pm.addIQProvider("query", "jabber:iq:version", Class.forName("org.jivesoftware.smackx.packet.Version"));
-//        } catch (ClassNotFoundException e) {
-//            //  Not sure what's happening here.
-//        }
-//
-////  VCard
-//        pm.addIQProvider("vCard", "vcard-temp", new VCardProvider());
-//
-////  Offline Message Requests
-//        pm.addIQProvider("offline", "http://jabber.org/protocol/offline", new OfflineMessageRequest.Provider());
-//
-////  Offline Message Indicator
-//        pm.addExtensionProvider("offline", "http://jabber.org/protocol/offline", new OfflineMessageInfo.Provider());
-//
-////  Last Activity
-//        pm.addIQProvider("query", "jabber:iq:last", new LastActivity.Provider());
-//
-////  User Search
-//        pm.addIQProvider("query", "jabber:iq:search", new UserSearch.Provider());
-//
-////  SharedGroupsInfo
-//        pm.addIQProvider("sharedgroup", "http://www.jivesoftware.org/protocol/sharedgroup", new SharedGroupsInfo.Provider());
-//
-////  JEP-33: Extended Stanza Addressing
-//        pm.addExtensionProvider("addresses", "http://jabber.org/protocol/address", new MultipleAddressesProvider());
-//
-////   FileTransfer
-//        pm.addIQProvider("si", "http://jabber.org/protocol/si", new StreamInitiationProvider());
-//
-//        pm.addIQProvider("query", "http://jabber.org/protocol/bytestreams", new BytestreamsProvider());
-//
-////  Privacy
-//        pm.addIQProvider("query", "jabber:iq:privacy", new PrivacyProvider());
-//        pm.addIQProvider("command", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider());
-//        pm.addExtensionProvider("malformed-action", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.MalformedActionError());
-//        pm.addExtensionProvider("bad-locale", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadLocaleError());
-//        pm.addExtensionProvider("bad-payload", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadPayloadError());
-//        pm.addExtensionProvider("bad-sessionid", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadSessionIDError());
-//        pm.addExtensionProvider("session-expired", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.SessionExpiredError());
-//    }
+
+//  Chat State
+        pm.addExtensionProvider("active", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("composing", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("paused", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("inactive", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+        pm.addExtensionProvider("gone", "http://jabber.org/protocol/chatstates", new ChatStateExtension.Provider());
+
+//  XHTML
+        pm.addExtensionProvider("html", "http://jabber.org/protocol/xhtml-im", new XHTMLExtensionProvider());
+
+//  Group Chat Invitations
+        pm.addExtensionProvider("x", "jabber:x:conference", new GroupChatInvitation.Provider());
+
+//  Service Discovery # Items
+        pm.addIQProvider("query", "http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
+
+//  Service Discovery # Info
+        pm.addIQProvider("query", "http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
+
+//  Data Forms
+        pm.addExtensionProvider("x", "jabber:x:data", new DataFormProvider());
+
+//  MUC User
+        pm.addExtensionProvider("x", "http://jabber.org/protocol/muc#user", new MUCUserProvider());
+
+//  MUC Admin
+        pm.addIQProvider("query", "http://jabber.org/protocol/muc#admin", new MUCAdminProvider());
+
+//  MUC Owner
+        pm.addIQProvider("query", "http://jabber.org/protocol/muc#owner", new MUCOwnerProvider());
+
+//  Delayed Delivery
+        pm.addExtensionProvider("x", "jabber:x:delay", new DelayInformationProvider());
+
+//  Version
+        try {
+            pm.addIQProvider("query", "jabber:iq:version", Class.forName("org.jivesoftware.smackx.packet.Version"));
+        } catch (ClassNotFoundException e) {
+            //  Not sure what's happening here.
+        }
+
+//  VCard
+        pm.addIQProvider("vCard", "vcard-temp", new VCardProvider());
+
+//  Offline Message Requests
+        pm.addIQProvider("offline", "http://jabber.org/protocol/offline", new OfflineMessageRequest.Provider());
+
+//  Offline Message Indicator
+        pm.addExtensionProvider("offline", "http://jabber.org/protocol/offline", new OfflineMessageInfo.Provider());
+
+//  Last Activity
+        pm.addIQProvider("query", "jabber:iq:last", new LastActivity.Provider());
+
+//  User Search
+        pm.addIQProvider("query", "jabber:iq:search", new UserSearch.Provider());
+
+//  SharedGroupsInfo
+        pm.addIQProvider("sharedgroup", "http://www.jivesoftware.org/protocol/sharedgroup", new SharedGroupsInfo.Provider());
+
+//  JEP-33: Extended Stanza Addressing
+        pm.addExtensionProvider("addresses", "http://jabber.org/protocol/address", new MultipleAddressesProvider());
+
+//   FileTransfer
+        pm.addIQProvider("si", "http://jabber.org/protocol/si", new StreamInitiationProvider());
+
+        pm.addIQProvider("query", "http://jabber.org/protocol/bytestreams", new BytestreamsProvider());
+
+//  Privacy
+        pm.addIQProvider("query", "jabber:iq:privacy", new PrivacyProvider());
+        pm.addIQProvider("command", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider());
+        pm.addExtensionProvider("malformed-action", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.MalformedActionError());
+        pm.addExtensionProvider("bad-locale", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadLocaleError());
+        pm.addExtensionProvider("bad-payload", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadPayloadError());
+        pm.addExtensionProvider("bad-sessionid", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.BadSessionIDError());
+        pm.addExtensionProvider("session-expired", "http://jabber.org/protocol/commands", new AdHocCommandDataProvider.SessionExpiredError());
+    }
 
     @Override
     public Observable<Boolean> login(final String username, final String password) {
@@ -289,22 +289,41 @@ public class QIMClient implements IClient, ConnectionListener, ChatMessageListen
     }
 
     @Override
-    public Observable find(String username) {
-        if (mUserSearchManager == null){
-            mUserSearchManager = new UserSearchManager(mConnection);
-        }
+    public Observable findUser(String username) {
         try {
-            Form searchForm = mUserSearchManager.getSearchForm(Config.SERVER_NAME);
-            Form answerForm = searchForm.createAnswerForm();
-            ReportedData data = mUserSearchManager.getSearchResults(answerForm,Config.SERVER_NAME);
-            for (ReportedData.Row row:data.getRows()) {
-                Log.d(TAG,row.toString());
+            if (mConnection == null){
+                return null;
             }
-        } catch (SmackException.NoResponseException e) {
+            if (!mConnection.isConnected()){
+                mConnection.connect();
+            }
+            if (mUserSearchManager == null){
+                mUserSearchManager = new UserSearchManager(mConnection);
+            }
+            HashMap<String, String> user;
+            List<HashMap<String, String>> results = new ArrayList<>();
+
+            Form searchForm = mUserSearchManager.getSearchForm(mConnection.getServiceName());
+            if (searchForm == null)
+                return null;
+
+            Form answerForm = searchForm.createAnswerForm();
+            answerForm.setAnswer("userAccount", true);
+//            answerForm.setAnswer("userPhote", userName);
+            ReportedData data = mUserSearchManager.getSearchResults(answerForm, String.valueOf(JidCreate.domainBareFrom("search" + mConnection.getServiceName())));
+
+            List<ReportedData.Row> rowList = data.getRows();
+            for (ReportedData.Row row : rowList) {
+                user = new HashMap<>();
+                user.put("userAccount", row.getValues("userAccount").toString());
+                user.put("userPhote", row.getValues("userPhote").toString());
+                results.add(user);
+                // 若存在，则有返回,UserName一定非空，其他两个若是有设，一定非空
+            }
+            return null;
+        } catch (SmackException | XmppStringprepException | XMPPException e) {
             e.printStackTrace();
-        } catch (XMPPException.XMPPErrorException e) {
-            e.printStackTrace();
-        } catch (SmackException.NotConnectedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
