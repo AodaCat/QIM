@@ -34,6 +34,16 @@ public class ChatPresenter implements ChatContract.IPresenter{
 
     @Override
     public void loadChatMessages(String user, long time, int limit, ChatCallback callback) {
+        ChatBean chatBean = null;
+        List<ChatBean> chatBeans = mChatBeanDao.queryBuilder()
+                .where(ChatBeanDao.Properties.User.eq(user))
+                .build()
+                .list();
+        if (chatBeans.size() == 1){
+            chatBean = chatBeans.get(0);
+            chatBean.setUnReadCount(0);
+            mChatBeanDao.insertOrReplace(chatBean);
+        }
         List<ChatMessage> results = mChatMessageDao.queryBuilder()
                 .whereOr(ChatMessageDao.Properties.From.eq(user),ChatMessageDao.Properties.To.eq(user))
                 .where(ChatMessageDao.Properties.Time.lt(time))
@@ -88,7 +98,7 @@ public class ChatPresenter implements ChatContract.IPresenter{
                             chatBean.setUser(user);
                             chatBean.setTime(System.currentTimeMillis());
                             chatBean.setUnReadCount(0);
-                            mChatBeanDao.insert(chatBean);
+                            mChatBeanDao.insertOrReplace(chatBean);
                             EventBus.getDefault().post(new Event(Event.TYPE_REFRESH_MESSAGE_LIST));
                             callback.onSuccess(chatMessage);
                         }
@@ -126,7 +136,7 @@ public class ChatPresenter implements ChatContract.IPresenter{
         chatBean.setTime(message.getTime());
         int unread = chatBean.getUnReadCount();
         chatBean.setUnReadCount(unread+1);
-        mChatBeanDao.insert(chatBean);
+        mChatBeanDao.insertOrReplace(chatBean);
         EventBus.getDefault().post(new Event(Event.TYPE_REFRESH_MESSAGE_LIST));
     }
 }

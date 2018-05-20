@@ -132,7 +132,7 @@ public class QIMService extends Service implements StanzaListener {
         chatBean.setTime(chatMessage.getTime());
         int unread = chatBean.getUnReadCount();
         chatBean.setUnReadCount(unread+1);
-        mChatBeanDao.insert(chatBean);
+        mChatBeanDao.insertOrReplace(chatBean);
         EventBus.getDefault().post(new Event(Event.TYPE_REFRESH_MESSAGE_LIST));
         int fromCount = unReadMessages.keySet().size();
         String user = "";
