@@ -96,7 +96,7 @@ public class ChatPresenter implements ChatContract.IPresenter{
                             }
                             chatBean.setMessage(msg);
                             chatBean.setUser(user);
-                            chatBean.setTo(to);
+                            chatBean.setTo(from);//自己。因为设定to是当前用户，from是会话的对方
                             chatBean.setTime(System.currentTimeMillis());
                             chatBean.setUnReadCount(0);
                             mChatBeanDao.insertOrReplace(chatBean);
@@ -133,9 +133,9 @@ public class ChatPresenter implements ChatContract.IPresenter{
             chatBean = new ChatBean();
         }
         chatBean.setMessage(message.getBody());
-        chatBean.setUser(message.getFrom());
+        chatBean.setUser(message.getFrom());//这里是接收消息，自然而然from是消息发送者，即对方
         chatBean.setTime(message.getTime());
-        chatBean.setTo(message.getTo());
+        chatBean.setTo(message.getTo());//这里是接收消息，自然而然to是消息接收者，即当前登陆用户
         int unread = chatBean.getUnReadCount();
         chatBean.setUnReadCount(unread+1);
         mChatBeanDao.insertOrReplace(chatBean);

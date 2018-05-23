@@ -28,10 +28,11 @@ import cc.adcat.qim.base.BaseFragment;
 import cc.adcat.qim.bean.ChatBean;
 import cc.adcat.qim.events.Event;
 import cc.adcat.qim.ui.chat.ChatActivity;
+import cc.adcat.qim.utils.Log;
 import cc.adcat.qim.widget.EmptyRecyclerView;
 
 public class MessageFragment extends BaseFragment implements MessageContract.IView, SwipeRefreshLayout.OnRefreshListener, ChatBeanAdapter.OnItemClickListener, MessageCallback {
-
+    private static final String TAG = "MessageFragment";
     @BindView(R.id.erv_messages)
     EmptyRecyclerView ervMessages;
     @BindView(R.id.sfl_messages)
@@ -120,6 +121,7 @@ public class MessageFragment extends BaseFragment implements MessageContract.IVi
     public void onMessageRecivied(Event event) {
         switch (event.getType()) {
             case Event.TYPE_REFRESH_MESSAGE_LIST:
+                Log.d(TAG,"EventBus收到事件，应该刷新列表");
                 mPresenter.loadChats(this);
                 break;
         }

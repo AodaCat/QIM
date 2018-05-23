@@ -11,10 +11,10 @@ import org.greenrobot.greendao.annotation.Generated;
 public class ChatBean {
     @Id
     private Long id;
-    private String user;
+    private String user;//会话的来源，会话窗口的对方，而不是消息的对方
     private String message;
     private Long time;
-    private String to;//对应于当前登录用户
+    private String to;//对应于当前登录用户，会话的接收者，而不是消息的接收者，这里就是当前登陆用户
     private int unReadCount;
     @Generated(hash = 653795555)
     public ChatBean(Long id, String user, String message, Long time, String to,
@@ -53,17 +53,18 @@ public class ChatBean {
     public void setTime(Long time) {
         this.time = time;
     }
-    public int getUnReadCount() {
-        return this.unReadCount;
-    }
-    public void setUnReadCount(int unReadCount) {
-        this.unReadCount = unReadCount;
-    }
     public String getTo() {
         return this.to;
     }
     public void setTo(String to) {
         this.to = to;
     }
+    public int getUnReadCount() {
+        return this.unReadCount;
+    }
+    public void setUnReadCount(int unReadCount) {
+        this.unReadCount = unReadCount;
+    }
+   
     
 }

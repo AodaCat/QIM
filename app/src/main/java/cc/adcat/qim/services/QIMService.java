@@ -132,9 +132,9 @@ public class QIMService extends Service implements StanzaListener {
             chatBean = new ChatBean();
         }
         chatBean.setMessage(chatMessage.getBody());
-        chatBean.setUser(chatMessage.getFrom());
+        chatBean.setUser(chatMessage.getFrom());//这里是接收消息，自然而然from是消息发送者，即对方
         chatBean.setTime(chatMessage.getTime());
-        chatBean.setTo(chatMessage.getTo());
+        chatBean.setTo(chatMessage.getTo());//这里是接收消息，自然而然to是消息接收者，即当前登陆用户
         int unread = chatBean.getUnReadCount();
         chatBean.setUnReadCount(unread+1);
         mChatBeanDao.insertOrReplace(chatBean);
@@ -178,6 +178,7 @@ public class QIMService extends Service implements StanzaListener {
         switch (event.getType()){
             case Event.TYPE_CLEAR_UNREADMESSAGE://清除未读消息
                 unReadMessages.clear();
+                mNotificationManager.cancel(0);
                 break;
         }
     }
