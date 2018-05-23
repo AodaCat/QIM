@@ -96,6 +96,7 @@ public class ChatPresenter implements ChatContract.IPresenter{
                             }
                             chatBean.setMessage(msg);
                             chatBean.setUser(user);
+                            chatBean.setTo(to);
                             chatBean.setTime(System.currentTimeMillis());
                             chatBean.setUnReadCount(0);
                             mChatBeanDao.insertOrReplace(chatBean);
@@ -134,6 +135,7 @@ public class ChatPresenter implements ChatContract.IPresenter{
         chatBean.setMessage(message.getBody());
         chatBean.setUser(message.getFrom());
         chatBean.setTime(message.getTime());
+        chatBean.setTo(message.getTo());
         int unread = chatBean.getUnReadCount();
         chatBean.setUnReadCount(unread+1);
         mChatBeanDao.insertOrReplace(chatBean);

@@ -15,6 +15,6 @@ public interface IClient {
     Observable<Boolean> send(String user,String msg);
     void addAsyncStanzaListener(StanzaListener listener);
     String getCurrentUser();
-    Observable findUser(String username);
-
+    Observable<String> findUser(String username);
+    Observable<Boolean> addFriend(String user);
 }

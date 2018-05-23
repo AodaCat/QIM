@@ -15,6 +15,7 @@
         <activity android:name=".ui.startup.StartUpActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -24,8 +25,11 @@
             android:launchMode="singleTask" />
         <activity android:name=".ui.register.RegisterActivity" />
         <activity android:name=".ui.chat.ChatActivity" />
+
         <service android:name=".services.QIMService" />
-        <activity android:name=".ui.addfriend.AddFriendActivity"/>
+
+        <activity android:name=".ui.addfriend.AddFriendActivity" />
+        <activity android:name=".ui.newfriend.NewFriendActivity"></activity>
     </application>
 
 </manifest>

@@ -1,5 +1,6 @@
 package cc.adcat.qim.ui.addfriend;
 
+import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import butterknife.BindView;
 import cc.adcat.qim.R;
 import cc.adcat.qim.base.BaseActivity;
+import cc.adcat.qim.ui.newfriend.NewFriendActivity;
 import cc.adcat.qim.utils.ToastUtil;
 
 public class AddFriendActivity extends BaseActivity implements AddFriendContract.IView, View.OnClickListener, AddFriendCallback {
@@ -86,5 +88,13 @@ public class AddFriendActivity extends BaseActivity implements AddFriendContract
     @Override
     public void toast(String msg) {
         ToastUtil.showLong(this,msg);
+    }
+
+    @Override
+    public void onFindUser(String username,String account) {
+        Intent intent = new Intent(this, NewFriendActivity.class);
+        intent.putExtra("username",username);
+        intent.putExtra("account",account);
+        launcherActivity(intent);
     }
 }

@@ -14,6 +14,7 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.jivesoftware.smack.StanzaListener;
+import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
@@ -101,6 +102,9 @@ public class QIMService extends Service implements StanzaListener {
         if (packet instanceof Message){
             EventBus.getDefault().post(packet);
         }
+        if (packet instanceof IQ){
+
+        }
     }
     //收到消息时候会发出消息通过EventBus抛出message，
     //如果被ChatActivity接受并处理，那这里就不会被处理
@@ -130,6 +134,7 @@ public class QIMService extends Service implements StanzaListener {
         chatBean.setMessage(chatMessage.getBody());
         chatBean.setUser(chatMessage.getFrom());
         chatBean.setTime(chatMessage.getTime());
+        chatBean.setTo(chatMessage.getTo());
         int unread = chatBean.getUnReadCount();
         chatBean.setUnReadCount(unread+1);
         mChatBeanDao.insertOrReplace(chatBean);

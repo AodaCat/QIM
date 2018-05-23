@@ -14,14 +14,16 @@ public class ChatBean {
     private String user;
     private String message;
     private Long time;
+    private String to;//对应于当前登录用户
     private int unReadCount;
-    @Generated(hash = 957459311)
-    public ChatBean(Long id, String user, String message, Long time,
+    @Generated(hash = 653795555)
+    public ChatBean(Long id, String user, String message, Long time, String to,
             int unReadCount) {
         this.id = id;
         this.user = user;
         this.message = message;
         this.time = time;
+        this.to = to;
         this.unReadCount = unReadCount;
     }
     @Generated(hash = 1872716502)
@@ -56,6 +58,12 @@ public class ChatBean {
     }
     public void setUnReadCount(int unReadCount) {
         this.unReadCount = unReadCount;
+    }
+    public String getTo() {
+        return this.to;
+    }
+    public void setTo(String to) {
+        this.to = to;
     }
     
 }

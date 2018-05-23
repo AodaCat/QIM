@@ -28,7 +28,8 @@ public class ChatBeanDao extends AbstractDao<ChatBean, Long> {
         public final static Property User = new Property(1, String.class, "user", false, "USER");
         public final static Property Message = new Property(2, String.class, "message", false, "MESSAGE");
         public final static Property Time = new Property(3, Long.class, "time", false, "TIME");
-        public final static Property UnReadCount = new Property(4, int.class, "unReadCount", false, "UN_READ_COUNT");
+        public final static Property To = new Property(4, String.class, "to", false, "TO");
+        public final static Property UnReadCount = new Property(5, int.class, "unReadCount", false, "UN_READ_COUNT");
     }
 
 
@@ -48,7 +49,8 @@ public class ChatBeanDao extends AbstractDao<ChatBean, Long> {
                 "\"USER\" TEXT," + // 1: user
                 "\"MESSAGE\" TEXT," + // 2: message
                 "\"TIME\" INTEGER," + // 3: time
-                "\"UN_READ_COUNT\" INTEGER NOT NULL );"); // 4: unReadCount
+                "\"TO\" TEXT," + // 4: to
+                "\"UN_READ_COUNT\" INTEGER NOT NULL );"); // 5: unReadCount
     }
 
     /** Drops the underlying database table. */
@@ -80,7 +82,12 @@ public class ChatBeanDao extends AbstractDao<ChatBean, Long> {
         if (time != null) {
             stmt.bindLong(4, time);
         }
-        stmt.bindLong(5, entity.getUnReadCount());
+ 
+        String to = entity.getTo();
+        if (to != null) {
+            stmt.bindString(5, to);
+        }
+        stmt.bindLong(6, entity.getUnReadCount());
     }
 
     @Override
@@ -106,7 +113,12 @@ public class ChatBeanDao extends AbstractDao<ChatBean, Long> {
         if (time != null) {
             stmt.bindLong(4, time);
         }
-        stmt.bindLong(5, entity.getUnReadCount());
+ 
+        String to = entity.getTo();
+        if (to != null) {
+            stmt.bindString(5, to);
+        }
+        stmt.bindLong(6, entity.getUnReadCount());
     }
 
     @Override
@@ -121,7 +133,8 @@ public class ChatBeanDao extends AbstractDao<ChatBean, Long> {
             cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1), // user
             cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2), // message
             cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3), // time
-            cursor.getInt(offset + 4) // unReadCount
+            cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // to
+            cursor.getInt(offset + 5) // unReadCount
         );
         return entity;
     }
@@ -132,7 +145,8 @@ public class ChatBeanDao extends AbstractDao<ChatBean, Long> {
         entity.setUser(cursor.isNull(offset + 1) ? null : cursor.getString(offset + 1));
         entity.setMessage(cursor.isNull(offset + 2) ? null : cursor.getString(offset + 2));
         entity.setTime(cursor.isNull(offset + 3) ? null : cursor.getLong(offset + 3));
-        entity.setUnReadCount(cursor.getInt(offset + 4));
+        entity.setTo(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
+        entity.setUnReadCount(cursor.getInt(offset + 5));
      }
     
     @Override

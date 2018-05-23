@@ -47,13 +47,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import cc.adcat.qim.bean.Contact;
+import cc.adcat.qim.global.Constant;
 import cc.adcat.qim.im.xmpp.QIMConnection;
 import cc.adcat.qim.utils.Log;
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.Scheduler;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -289,44 +293,30 @@ public class QIMClient implements IClient, ConnectionListener, ChatMessageListen
     }
 
     @Override
-    public Observable findUser(String username) {
-        try {
-            if (mConnection == null){
-                return null;
-            }
-            if (!mConnection.isConnected()){
-                mConnection.connect();
-            }
-            if (mUserSearchManager == null){
-                mUserSearchManager = new UserSearchManager(mConnection);
-            }
-            HashMap<String, String> user;
-            List<HashMap<String, String>> results = new ArrayList<>();
+    public Observable<String> findUser(String username) {
+        return Observable.create((ObservableOnSubscribe<String>) emitter -> {
+            Random random = new Random();
+            int sleep = random.nextInt(5);
+            Thread.sleep(sleep*1000);//假装在搜索
+            emitter.onNext(username+ Constant.SUFFIX_USERNAME);
+            emitter.onComplete();
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
+    }
 
-            Form searchForm = mUserSearchManager.getSearchForm(mConnection.getServiceName());
-            if (searchForm == null)
-                return null;
-
-            Form answerForm = searchForm.createAnswerForm();
-            answerForm.setAnswer("userAccount", true);
-//            answerForm.setAnswer("userPhote", userName);
-            ReportedData data = mUserSearchManager.getSearchResults(answerForm, String.valueOf(JidCreate.domainBareFrom("search" + mConnection.getServiceName())));
-
-            List<ReportedData.Row> rowList = data.getRows();
-            for (ReportedData.Row row : rowList) {
-                user = new HashMap<>();
-                user.put("userAccount", row.getValues("userAccount").toString());
-                user.put("userPhote", row.getValues("userPhote").toString());
-                results.add(user);
-                // 若存在，则有返回,UserName一定非空，其他两个若是有设，一定非空
-            }
-            return null;
-        } catch (SmackException | XmppStringprepException | XMPPException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    @Override
+    public Observable<Boolean> addFriend(String user) {
+        return Observable.create((ObservableOnSubscribe<Boolean>) emitter -> {
+            Random random = new Random();
+            int sleep = random.nextInt(5);
+            Thread.sleep(sleep*1000);//假装在干活
+            mRoster.createEntry(user,user,null);
+            emitter.onNext(true);
+            emitter.onComplete();
+        })
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread());
     }
 
 

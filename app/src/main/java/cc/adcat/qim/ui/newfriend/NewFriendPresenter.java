@@ -1,47 +1,42 @@
-package cc.adcat.qim.ui.addfriend;
+package cc.adcat.qim.ui.newfriend;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import cc.adcat.qim.im.IClient;
 import cc.adcat.qim.im.QIMClient;
 import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
 
-public class AddFriendPresenter implements AddFriendContract.IPresenter{
+public class NewFriendPresenter implements NewFriendContract.IPresenter{
     private Context mContext;
-    private AddFriendContract.IView mView;
+    private NewFriendContract.IView mView;
     private IClient mClient;
-    public AddFriendPresenter(Context context, AddFriendContract.IView view) {
+
+    public NewFriendPresenter(Context context, NewFriendContract.IView view) {
         this.mContext = context;
         this.mView = view;
         mClient = QIMClient.getInstance();
     }
 
     @Override
-    public void find(String username, AddFriendCallback callback) {
-        if (TextUtils.isEmpty(username)){
-            mView.toast("用户名不能为空...");
-            return;
-        }
-        mView.showProgressBar("正在搜索");
-        mClient.findUser(username)
-                .subscribe(new Observer<String>() {
+    public void addFriend(String username, NewFriendCallback callback) {
+        mClient.addFriend(username)
+                .subscribe(new Observer<Boolean>() {
                     @Override
                     public void onSubscribe(Disposable d) {
 
                     }
 
                     @Override
-                    public void onNext(String s) {
+                    public void onNext(Boolean aBoolean) {
                         mView.hideProgressBar();
-                        callback.onFindUser(username,s);
+                        callback.onAddFriendSuccess();
                     }
 
                     @Override
                     public void onError(Throwable e) {
                         mView.hideProgressBar();
-                        mView.toast("出错了....");
+                        callback.onAddFriendFailed(e);
                     }
 
                     @Override
